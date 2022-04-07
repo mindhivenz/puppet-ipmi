@@ -1356,31 +1356,6 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="pathspec (vbundled(1.0.0)) [path][gem]" type="rubylib">
-        <properties>
-          <option name="version" value="4" />
-        </properties>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/bin" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/lib" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/docs" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/spec" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/bin" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/lib" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/docs" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/spec" />
-        </SOURCES>
-        <excluded>
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/bin" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/docs" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/pathspec-1.0.0/spec" />
-        </excluded>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
       <library name="pluginator (vbundled(1.5.0)) [path][gem]" type="rubylib">
         <properties>
           <option name="version" value="4" />
@@ -1523,36 +1498,6 @@
           <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/puppet-debugger-1.2.0/spec" />
           <root url="file://$MODULE_DIR$/vendor/bundle/ruby/2.7.0/gems/puppet-debugger-1.2.0/.vscode" />
         </excluded>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="puppet-module-posix-default-r2.7 (vbundled(1.1.0)) [path][gem]" type="rubylib">
-        <properties>
-          <option name="version" value="4" />
-        </properties>
-        <CLASSES />
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="puppet-module-posix-dev-r2.7 (vbundled(1.1.0)) [path][gem]" type="rubylib">
-        <properties>
-          <option name="version" value="4" />
-        </properties>
-        <CLASSES />
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="puppet-module-posix-system-r2.7 (vbundled(1.1.0)) [path][gem]" type="rubylib">
-        <properties>
-          <option name="version" value="4" />
-        </properties>
-        <CLASSES />
-        <JAVADOC />
-        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
@@ -2638,7 +2583,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" scope="PROVIDED" name="bundler (v2.1.4, PDK) [gem]" level="application" />
-    <orderEntry type="library" scope="PROVIDED" name="json (v2.3.0, PDK) [gem]" level="application" />
   </component>
   <component name="RModuleSettingsStorage">
     <LOAD_PATH number="1" string0="$MODULE_DIR$/spec" />
