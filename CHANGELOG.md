@@ -2,6 +2,16 @@
 
 All notable changes after forking will be documented in this file.
 
+## Release 4.4.0
+
+**Features**
+- Allow `stdlib` up to version < 9.0.0
+
+## Release 4.3.0
+
+**Features**
+- Allow Puppet 7
+
 ## Release 4.1.0
 
 **Features**
