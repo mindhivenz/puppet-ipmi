@@ -19,7 +19,7 @@ define ipmi::user (
 
   $tool = '/usr/bin/ipmitool'
 
-  if $ensure == present {
+  if $ensure in [present, enabled] {
 
     exec { "ipmi_user_add_${title}":
       command => "${tool} user set name ${id} ${username}",

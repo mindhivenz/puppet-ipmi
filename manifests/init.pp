@@ -7,11 +7,24 @@ class ipmi (
   Enum[present, absent] $ensure                  = present,
   Enum[running, stopped] $ipmievd_service_ensure = stopped,
   Boolean $watchdog                              = false,
-  Array[Hash] $users                             = [],
+  Array[Struct[{
+    id        => Optional[Integer[1]],
+    ensure    => Optional[Enum[present, enabled, absent, disabled]],
+    username  => String,
+    password  => Optional[String],
+    privilege => Optional[Integer[1, 4]],
+    channel   => Optional[Integer[1]],
+  }]] $users                                     = [],
   Boolean $purge_users                           = false,
   Variant[Boolean, Enum[optional]] $foreman_user = false,
   Integer[1, 4] $foreman_user_privilege          = 4,
-  Optional[Hash] $network                        = undef,
+  Optional[Struct[{
+    ip      => Optional[Stdlib::IP::Address::V4::Nosubnet],
+    netmask => Optional[Stdlib::IP::Address::V4::Nosubnet],
+    gateway => Optional[Stdlib::IP::Address::V4::Nosubnet],
+    type    => Optional[Enum[dhcp, static]],
+    channel => Optional[Integer[1]],
+  }]] $network                                   = undef,
   Optional[String] $snmp                         = undef,
 ) {
 
@@ -44,7 +57,7 @@ class ipmi (
     Service[$ipmi::params::ipmi_service_name] -> Ipmi::Network <| |>
     Service[$ipmi::params::ipmi_service_name] -> Ipmi::Snmp <| |>
 
-    $foreman_bmc = if $foreman_user {
+    $apply_foreman_bmc = if $foreman_user {
       if !$::foreman_interfaces {
         fail("foreman_user set but 'foreman_interfaces' not passed from Foreman ENC")
       }
@@ -80,10 +93,10 @@ class ipmi (
     } else {
       undef
     }
-    $foreman_users = if $foreman_bmc {
+    $foreman_users = if $apply_foreman_bmc {
       [{
-        username  => $foreman_bmc['username'],
-        password  => $foreman_bmc['password'],
+        username  => $apply_foreman_bmc['username'],
+        password  => $apply_foreman_bmc['password'],
         privilege => $foreman_user_privilege,
       }]
     } else {
@@ -114,7 +127,7 @@ class ipmi (
       $all_possible_ids = Integer[1, $facts['ipmi_max_users']].map |$i| { $i }
       $available_ids = $all_possible_ids - $existing_ids - $passed_ids
       $users_without_id.map |$i, $user| {
-        if $user[ensure] in [absent, disabled] {
+        if $user[ensure] == absent {
           fail("Can't have user ensure => ${$user[ensure]} when no id specified")
         }
         $id = $available_ids[$i]
