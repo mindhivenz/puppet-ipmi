@@ -2,6 +2,11 @@
 
 All notable changes after forking will be documented in this file.
 
+## Release 4.5.0
+
+**Features**
+- Full typing for `users` and `network` on `ipmi` 
+
 ## Release 4.4.0
 
 **Features**

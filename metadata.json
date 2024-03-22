@@ -1,6 +1,6 @@
 {
   "name": "mindhive-ipmi",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "author": "Damon Maria <damon@mindhvie.co.nz>, Joshua Hoblitt <jhoblitt@cpan.org>",
   "summary": "Manage local BMC through IPMI",
   "license": "Apache-2.0",
@@ -47,7 +47,8 @@
         "12.04",
         "16.04",
         "18.04",
-        "20.04"
+        "20.04",
+        "22.04"
       ]
     },
     {
