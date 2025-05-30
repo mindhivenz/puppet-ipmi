@@ -2,6 +2,11 @@
 
 All notable changes after forking will be documented in this file.
 
+## Release 4.6.0
+
+**Features**
+- Allow stdlib v9 
+
 ## Release 4.5.0
 
 **Features**
