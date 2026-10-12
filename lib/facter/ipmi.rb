@@ -1,5 +1,5 @@
-#!/usr/bin/env ruby
-#
+# frozen_string_literal: true
+
 # IPMI facts, in a format compatible with The Foreman
 #
 # Sending these facts to a Puppet Server equipped with Foreman
@@ -37,7 +37,7 @@ end
 def load_user_facts
   users = []
   max_id = max_users
-  return unless max_id && max_id > 0
+  return unless max_id&.positive?
 
   add_ipmi_fact 'max_users', max_id
 
@@ -87,9 +87,7 @@ def load_user_facts
       fixed_name: fixed_name,
       enabled: enabled,
     }
-    if privilege
-      user[:privilege] = privilege
-    end
+    user[:privilege] = privilege if privilege
     users << user
   end
 
@@ -99,9 +97,7 @@ end
 def max_users
   output = Facter::Core::Execution.execute('ipmitool user summary 2>&1')
   output.each_line do |line|
-    if line =~ %r{^Maximum IDs\s*:\s*(\d+)}
-      return Regexp.last_match(1).to_i
-    end
+    return Regexp.last_match(1).to_i if line =~ %r{^Maximum IDs\s*:\s*(\d+)}
   end
   nil
 end

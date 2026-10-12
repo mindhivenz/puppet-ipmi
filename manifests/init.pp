@@ -1,8 +1,4 @@
-# == Class: ipmi
-#
-# Please refer to https://github.com/jhoblitt/puppet-ipmi#usage for
-# parameter documentation.
-#
+# @summary Manages the local BMC through IPMI: packages, service, users, network and SNMP
 class ipmi (
   Enum[present, absent] $ensure                  = present,
   Enum[running, stopped] $ipmievd_service_ensure = stopped,
@@ -11,9 +7,8 @@ class ipmi (
     id        => Optional[Integer[1]],
     ensure    => Optional[Enum[present, enabled, absent, disabled]],
     username  => String,
-    password  => Optional[String],
+    password  => Optional[Variant[Sensitive[String], String]],
     privilege => Optional[Integer[1, 4]],
-    channel   => Optional[Integer[1]],
   }]] $users                                     = [],
   Boolean $purge_users                           = false,
   Variant[Boolean, Enum[optional]] $foreman_user = false,
@@ -23,19 +18,16 @@ class ipmi (
     netmask => Optional[Stdlib::IP::Address::V4::Nosubnet],
     gateway => Optional[Stdlib::IP::Address::V4::Nosubnet],
     type    => Optional[Enum[dhcp, static]],
-    channel => Optional[Integer[1]],
   }]] $network                                   = undef,
   Optional[String] $snmp                         = undef,
 ) {
-
   include ipmi::params
 
   if $ensure == present {
-
     $watchdog_str = if $watchdog { 'yes' } else { 'no' }
     $channel = $ipmi::params::channel
 
-    ensure_packages($ipmi::params::ipmi_package)
+    stdlib::ensure_packages($ipmi::params::ipmi_package)
 
     Package[$ipmi::params::ipmi_package]
     ~> augeas { $ipmi::params::config_location:
@@ -57,18 +49,22 @@ class ipmi (
     Service[$ipmi::params::ipmi_service_name] -> Ipmi::Network <| |>
     Service[$ipmi::params::ipmi_service_name] -> Ipmi::Snmp <| |>
 
+    # foreman_interfaces is a top-scope parameter from the Foreman ENC, not a fact,
+    # and getvar tolerates it being absent under strict_variables
+    $foreman_interfaces = getvar('::foreman_interfaces')
+
     $apply_foreman_bmc = if $foreman_user {
-      if !$::foreman_interfaces {
+      if !$foreman_interfaces {
         fail("foreman_user set but 'foreman_interfaces' not passed from Foreman ENC")
       }
       if !('ipmi_macaddress' in $facts) {
         warning(join([
           "foreman_user set but missing 'ipmi_macaddress' fact, ",
-          "assuming this is first run and wasn't installed before facts gneerated, not adding Foreman user",
+          "assuming this is first run and wasn't installed before facts generated, not adding Foreman user",
         ]))
         ; undef
       } else {
-        $foreman_bmcs = $::foreman_interfaces.filter |$interface| {
+        $foreman_bmcs = $foreman_interfaces.filter |$interface| {
           $interface['type'] == 'BMC' and $interface['mac'] == $facts['ipmi_macaddress']
         }
         if empty($foreman_bmcs) {
@@ -96,7 +92,7 @@ class ipmi (
     $foreman_users = if $apply_foreman_bmc {
       [{
         username  => $apply_foreman_bmc['username'],
-        password  => $apply_foreman_bmc['password'],
+        password  => Sensitive($apply_foreman_bmc['password']),
         privilege => $foreman_user_privilege,
       }]
     } else {
@@ -139,8 +135,8 @@ class ipmi (
     } else {
       if !empty($users_without_id) {
         warning(join([
-          "users without ids but missing 'ipmi_*' facts,",
-          "assuming this is first run and wasn't installed before facts gneerated, not adding Foreman user",
+          "users without ids but missing 'ipmi_*' facts, ",
+          "assuming this is first run and wasn't installed before facts generated, not adding them",
         ]))
       }
       ; []
@@ -152,7 +148,7 @@ class ipmi (
       if !('ipmi_users' in $facts) {
         warning(join([
           "purge_users set but no 'ipmi_users' fact, ",
-          "assuming this is first run and wasn't installed before facts gneerated, not purging",
+          "assuming this is first run and wasn't installed before facts generated, not purging",
         ]))
         ; []
       } else {
@@ -170,19 +166,15 @@ class ipmi (
       []
     }
 
-    $users_hash = Hash(($users_wanted + $users_remove).map |$user| {
-      $id = $user['id']
-      ["id_${id}", $user + { channel => $channel }]
-    })
-
-    create_resources('ipmi::user',
-      $users_hash,
-    )
+    ($users_wanted + $users_remove).each |$user| {
+      ipmi::user { "id_${user['id']}":
+        * => $user + { channel => $channel },
+      }
+    }
 
     if $network {
       ipmi::network { 'init':
-        *       => $network,
-        channel => $channel,
+        * => $network + { channel => $channel },
       }
     }
 
@@ -192,13 +184,9 @@ class ipmi (
         channel => $channel,
       }
     }
-
   } else {
-
-    ensure_packages($ipmi::params::ipmi_package, {
+    stdlib::ensure_packages($ipmi::params::ipmi_package, {
       ensure => absent,
     })
-
   }
-
 }

@@ -1,10 +1,10 @@
 {
   "name": "mindhive-ipmi",
-  "version": "4.6.1",
-  "author": "Damon Maria <damon@mindhvie.co.nz>, Joshua Hoblitt <jhoblitt@cpan.org>",
+  "version": "4.7.0",
+  "author": "Damon Maria <damon@mindhive.co.nz>, Joshua Hoblitt <jhoblitt@cpan.org>",
   "summary": "Manage local BMC through IPMI",
   "license": "Apache-2.0",
-  "source": "https://github.com/mindhivenz/puppet-ipmi.git",
+  "source": "https://github.com/mindhivenz/puppet-ipmi",
   "project_page": "https://github.com/mindhivenz/puppet-ipmi",
   "issues_url": "https://github.com/mindhivenz/puppet-ipmi/issues",
   "dependencies": [
@@ -14,58 +14,24 @@
     },
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 4.6.0 < 10.0.0"
+      "version_requirement": ">= 9.0.0 < 10.0.0"
     }
   ],
   "operatingsystem_support": [
     {
-      "operatingsystem": "RedHat",
-      "operatingsystemrelease": [
-        "5",
-        "6",
-        "7"
-      ]
-    },
-    {
-      "operatingsystem": "CentOS",
-      "operatingsystemrelease": [
-        "5",
-        "6",
-        "7"
-      ]
-    },
-    {
-      "operatingsystem": "Scientific",
-      "operatingsystemrelease": [
-        "6",
-        "7"
-      ]
-    },
-    {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
-        "12.04",
-        "16.04",
-        "18.04",
         "20.04",
         "22.04",
         "24.04"
-      ]
-    },
-    {
-      "operatingsystem": "Debian",
-      "operatingsystemrelease": [
-        "8"
       ]
     }
   ],
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 6.0.0 < 8.0.0"
+      "version_requirement": ">= 7.0.0 < 9.0.0"
     }
   ],
-  "pdk-version": "2.6.1",
-  "template-url": "pdk-default#2.7.1",
-  "template-ref": "tags/2.7.1-0-g9a16c87"
+  "tags": []
 }

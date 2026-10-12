@@ -1,14 +1,12 @@
-# == Defined resource type: ipmi::user
-#
+# @summary Adds, updates or disables a BMC user
 define ipmi::user (
   Integer[1] $id,
-  Enum[present, enabled, absent, disabled] $ensure = present,
-  String $username                                 = $title,
-  Optional[String] $password                       = undef,
-  Integer[1, 4] $privilege                         = 4,
-  Integer[1] $channel                              = 1,
+  Enum[present, enabled, absent, disabled] $ensure       = present,
+  String $username                                       = $title,
+  Optional[Variant[Sensitive[String], String]] $password = undef,
+  Integer[1, 4] $privilege                               = 4,
+  Integer[1] $channel                                    = 1,
 ) {
-
   $priv_text = case $privilege {
     1: { 'CALLBACK' }
     2: { 'USER' }
@@ -20,7 +18,6 @@ define ipmi::user (
   $tool = '/usr/bin/ipmitool'
 
   if $ensure in [present, enabled] {
-
     exec { "ipmi_user_add_${title}":
       command => "${tool} user set name ${id} ${username}",
       unless  => "${tool} channel getaccess ${channel} ${id} | grep '^User Name.*: ${username}$'",
@@ -38,9 +35,10 @@ define ipmi::user (
     }
 
     if $password {
+      $escaped_password = stdlib::shell_escape($password.unwrap)
       exec { "ipmi_user_setpw_${title}":
-        command => "${tool} user set password ${id} \'${password}\'",
-        unless  => "${tool} user test ${id} 16 \'${password}\'",
+        command => Sensitive("${tool} user set password ${id} ${escaped_password}"),
+        unless  => Sensitive("${tool} user test ${id} 16 ${escaped_password}"),
         require => Exec["ipmi_user_add_${title}"],
         notify  => $refresh_execs,
       }
@@ -57,14 +55,10 @@ define ipmi::user (
       command     => "${tool} sol payload enable ${channel} ${id}",
       refreshonly => true,
     }
-
   } else {
-
     exec { "ipmi_user_disable_${title}":
       command => "${tool} user disable ${id}",
       unless  => "${tool} channel getaccess ${channel} ${id} | grep '^Enable Status.*: disabled$'",
     }
-
   }
-
 }

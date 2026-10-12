@@ -1,4 +1,6 @@
+# Versions mirror the production control repos (e.g. tannery-control Puppetfile)
+---
 fixtures:
   forge_modules:
-    stdlib: puppetlabs/stdlib
-    augeas: puppetlabs/augeas_core
+    augeas_core: { repo: "puppetlabs/augeas_core", ref: "1.5.0" }
+    stdlib: { repo: "puppetlabs/stdlib", ref: "9.7.0" }

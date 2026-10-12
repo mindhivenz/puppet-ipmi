@@ -1,4 +1,4 @@
 ipmi::snmp { 'lan1':
-  snmp        => 'secret',
-  lan_channel => 1,
+  snmp    => 'secret',
+  channel => 1,
 }
