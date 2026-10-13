@@ -1,0 +1,13 @@
+ Chassis Type          : Other
+ Chassis Part Number   : CSE-505-203B
+ Chassis Serial        : C5050LK26NP0123
+ Board Mfg Date        : Mon Jan  1 00:00:00 1996
+ Board Mfg             : Supermicro
+ Board Product         :
+ Board Serial          : ZM19AS012345
+ Board Part Number     : X11SCL-IF
+ Product Manufacturer  : Supermicro
+ Product Name          :
+ Product Part Number   : SYS-5019C-L
+ Product Version       :
+ Product Serial        : S392000X9123456

@@ -102,6 +102,22 @@ def max_users
   nil
 end
 
+def load_inventory_facts
+  { 'mc_info' => 'mc info', 'fru' => 'fru print 0' }.each do |name, command|
+    fields = ipmitool_fields(command)
+    add_ipmi_fact(name, fields) unless fields.empty?
+  end
+end
+
+# stderr is dropped because error messages also hold 'key: value' pairs
+def ipmitool_fields(command)
+  output = Facter::Core::Execution.execute("ipmitool #{command} 2>/dev/null")
+  output.each_line.filter_map do |line|
+    key, value = line.split(':', 2).map(&:strip)
+    [key.downcase.gsub(%r{\W+}, '_'), value] unless value.nil? || value.empty?
+  end.to_h
+end
+
 def add_ipmi_fact(name, value)
   Facter.add("ipmi_#{name}") do
     confine kernel: 'Linux'
@@ -115,4 +131,5 @@ add_ipmi_fact 'channel', @channel_id
 if Facter::Core::Execution.which('ipmitool')
   load_net_facts
   load_user_facts
+  load_inventory_facts
 end

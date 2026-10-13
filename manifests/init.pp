@@ -7,7 +7,7 @@ class ipmi (
     id        => Optional[Integer[1]],
     ensure    => Optional[Enum[present, enabled, absent, disabled]],
     username  => String,
-    password  => Optional[Variant[Sensitive[String], String]],
+    password  => Optional[Variant[Sensitive[String[1, 20]], String[1, 20]]],
     privilege => Optional[Integer[1, 4]],
   }]] $users                                     = [],
   Boolean $purge_users                           = false,

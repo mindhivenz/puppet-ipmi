@@ -2,6 +2,19 @@
 
 All notable changes after forking will be documented in this file.
 
+## Release 4.8.0
+
+**Features**
+- `ipmi_mc_info` and `ipmi_fru` facts: BMC firmware, manufacturer, and board/chassis/product part and serial numbers
+- Allows `augeas_core` 2
+
+**Changed**
+- User passwords must be 1 to 20 characters, the IPMI 2.0 limit
+
+**Fix**
+- User passwords longer than 16 characters are set with 20 byte capacity, so they are no longer rejected or truncated and no longer reset every run
+- Disabled and purged users also have channel access revoked (`NO ACCESS`) and SOL disabled, as some BMC firmware still lets a disabled user in
+
 ## Release 4.7.0
 
 **Features**

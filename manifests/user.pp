@@ -1,11 +1,11 @@
 # @summary Adds, updates or disables a BMC user
 define ipmi::user (
   Integer[1] $id,
-  Enum[present, enabled, absent, disabled] $ensure       = present,
-  String $username                                       = $title,
-  Optional[Variant[Sensitive[String], String]] $password = undef,
-  Integer[1, 4] $privilege                               = 4,
-  Integer[1] $channel                                    = 1,
+  Enum[present, enabled, absent, disabled] $ensure                     = present,
+  String $username                                                     = $title,
+  Optional[Variant[Sensitive[String[1, 20]], String[1, 20]]] $password = undef,
+  Integer[1, 4] $privilege                                             = 4,
+  Integer[1] $channel                                                  = 1,
 ) {
   $priv_text = case $privilege {
     1: { 'CALLBACK' }
@@ -35,10 +35,13 @@ define ipmi::user (
     }
 
     if $password {
-      $escaped_password = stdlib::shell_escape($password.unwrap)
+      $plain_password = $password.unwrap
+      $escaped_password = stdlib::shell_escape($plain_password)
+      # ipmitool defaults to 16 byte capacity, which can't hold a longer password
+      $capacity = if $plain_password.length > 16 { 20 } else { 16 }
       exec { "ipmi_user_setpw_${title}":
-        command => Sensitive("${tool} user set password ${id} ${escaped_password}"),
-        unless  => Sensitive("${tool} user test ${id} 16 ${escaped_password}"),
+        command => Sensitive("${tool} user set password ${id} ${escaped_password} ${capacity}"),
+        unless  => Sensitive("${tool} user test ${id} ${capacity} ${escaped_password}"),
         require => Exec["ipmi_user_add_${title}"],
         notify  => $refresh_execs,
       }
@@ -56,9 +59,26 @@ define ipmi::user (
       refreshonly => true,
     }
   } else {
+    $refresh_execs = [
+      Exec["ipmi_user_disable_sol_${title}"],
+    ]
+
+    # Some BMC firmware still grants access to a disabled user, so its channel access is revoked too
+    exec { "ipmi_user_revoke_${title}":
+      command => "${tool} channel setaccess ${channel} ${id} callin=off ipmi=off link=off privilege=15",
+      unless  => "${tool} channel getaccess ${channel} ${id} | grep '^Privilege Level.*: NO ACCESS$'",
+      notify  => $refresh_execs,
+    }
+
     exec { "ipmi_user_disable_${title}":
       command => "${tool} user disable ${id}",
       unless  => "${tool} channel getaccess ${channel} ${id} | grep '^Enable Status.*: disabled$'",
+      notify  => $refresh_execs,
+    }
+
+    exec { "ipmi_user_disable_sol_${title}":
+      command     => "${tool} sol payload disable ${channel} ${id}",
+      refreshonly => true,
     }
   }
 }

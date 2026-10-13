@@ -8,15 +8,17 @@ describe 'ipmi facts' do
     allow(Facter.fact(:kernel)).to receive(:value).and_return('Linux')
   end
 
-  def stub_ipmitool(command, output_fixture)
-    output = File.read(File.join(__dir__, '../../fixtures/ipmitool', "#{output_fixture}.txt"))
-    allow(Facter::Core::Execution).to receive(:execute).with("ipmitool #{command} 2>&1").and_return(output)
+  def stub_ipmitool(command, output_fixture, redirect: '2>&1')
+    output = output_fixture ? File.read(File.join(__dir__, '../../fixtures/ipmitool', "#{output_fixture}.txt")) : ''
+    allow(Facter::Core::Execution).to receive(:execute).with("ipmitool #{command} #{redirect}").and_return(output)
   end
 
   context 'with ipmitool installed' do
     before do
       allow(Facter::Core::Execution).to receive(:which).with('ipmitool').and_return('/usr/bin/ipmitool')
       stub_ipmitool('lan print 1', 'lan_print_1')
+      stub_ipmitool('mc info', 'mc_info', redirect: '2>/dev/null')
+      stub_ipmitool('fru print 0', 'fru_print_0', redirect: '2>/dev/null')
     end
 
     context 'with a user summary' do
@@ -46,12 +48,53 @@ describe 'ipmi facts' do
         )
       end
 
+      it 'keeps management controller fields that have a value' do
+        expect(Facter.value(:ipmi_mc_info)).to eq(
+          'device_id' => '32',
+          'device_revision' => '1',
+          'firmware_revision' => '1.73',
+          'ipmi_version' => '2.0',
+          'manufacturer_id' => '10876',
+          'manufacturer_name' => 'Supermicro',
+          'product_id' => '6929 (0x1b11)',
+          'product_name' => 'Unknown (0x1B11)',
+          'device_available' => 'yes',
+          'provides_device_sdrs' => 'no',
+        )
+      end
+
+      it 'keeps FRU fields that have a value' do
+        expect(Facter.value(:ipmi_fru)).to eq(
+          'chassis_type' => 'Other',
+          'chassis_part_number' => 'CSE-505-203B',
+          'chassis_serial' => 'C5050LK26NP0123',
+          'board_mfg_date' => 'Mon Jan  1 00:00:00 1996',
+          'board_mfg' => 'Supermicro',
+          'board_serial' => 'ZM19AS012345',
+          'board_part_number' => 'X11SCL-IF',
+          'product_manufacturer' => 'Supermicro',
+          'product_part_number' => 'SYS-5019C-L',
+          'product_serial' => 'S392000X9123456',
+        )
+      end
+
+      context 'when the BMC returns no inventory' do
+        before do
+          stub_ipmitool('mc info', nil, redirect: '2>/dev/null')
+          stub_ipmitool('fru print 0', nil, redirect: '2>/dev/null')
+        end
+
+        it { expect(Facter.value(:ipmi_mc_info)).to be_nil }
+        it { expect(Facter.value(:ipmi_fru)).to be_nil }
+      end
+
       context 'on a non-Linux kernel' do
         before { allow(Facter.fact(:kernel)).to receive(:value).and_return('windows') }
 
         it { expect(Facter.value(:ipmi_channel)).to be_nil }
         it { expect(Facter.value(:ipmi_macaddress)).to be_nil }
         it { expect(Facter.value(:ipmi_users)).to be_nil }
+        it { expect(Facter.value(:ipmi_fru)).to be_nil }
       end
     end
 
@@ -71,5 +114,6 @@ describe 'ipmi facts' do
     it { expect(Facter.value(:ipmi_ipaddress)).to be_nil }
     it { expect(Facter.value(:ipmi_max_users)).to be_nil }
     it { expect(Facter.value(:ipmi_users)).to be_nil }
+    it { expect(Facter.value(:ipmi_mc_info)).to be_nil }
   end
 end

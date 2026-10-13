@@ -12,8 +12,8 @@ Description
 Forked from [jhoblitt-ipmi](https://forge.puppet.com/jhoblitt/ipmi) with much thanks to the original author.
 
 - Installs the [OpenIPMI](http://openipmi.sourceforge.net/) package and service
-- Provides IPMI LAN and user facts
-- Adding/updating/disabling of IPMI users
+- Provides IPMI LAN, user, management controller (`ipmi_mc_info`) and FRU inventory (`ipmi_fru`) facts
+- Adding/updating/disabling of IPMI users. Passwords are 1 to 20 characters. Disabled users also lose channel access and SOL
 - Purging users beyond those wanted
 - Setting of IPMI LAN network settings
 - LAN facts automatically will add/update BMC NIC interface in [Foreman](https://www.theforeman.org)

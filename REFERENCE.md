@@ -73,7 +73,7 @@ Array[Struct[{
     id        => Optional[Integer[1]],
     ensure    => Optional[Enum[present, enabled, absent, disabled]],
     username  => String,
-    password  => Optional[Variant[Sensitive[String], String]],
+    password  => Optional[Variant[Sensitive[String[1, 20]], String[1, 20]]],
     privilege => Optional[Integer[1, 4]],
   }]]
 ```
@@ -253,7 +253,7 @@ Default value: `$title`
 
 ##### <a name="-ipmi--user--password"></a>`password`
 
-Data type: `Optional[Variant[Sensitive[String], String]]`
+Data type: `Optional[Variant[Sensitive[String[1, 20]], String[1, 20]]]`
 
 
 
