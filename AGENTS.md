@@ -41,7 +41,7 @@ docker run --rm -v "$PWD:/repo" -e SPEC=spec/classes/<name>_spec.rb "$JIG_RUNNER
 
 ## Fixtures
 
-Use https URLs for git fixtures in `.fixtures.yml`. CI has no SSH key. It clones private `mindhivenz` repos with a `cicd-mindhivenz` GitHub App token, so give the App access to a private repo before using it as a fixture.
+Use https URLs for git fixtures in `.fixtures.yml`. CI has no SSH key. It clones private `mindhivenz` repos with a `cicd-mindhivenz` GitHub App token, so give the App access to a private repo before using it as a fixture. The App credentials are shared only with private repos, so a public module can't have private fixtures.
 
 ## Adding components
 
