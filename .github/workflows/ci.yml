@@ -20,4 +20,16 @@ jobs:
         task: [validate, lint, rubocop, spec]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: docker run --rm -v "$PWD:/repo" "$VOXBOX_IMAGE" ${{ matrix.task }}
+      # Fixtures can be private mindhivenz/puppet-* repos, which this repo's GITHUB_TOKEN can't read
+      - id: modules-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.MINDHIVE_CICD_GH_CLIENT_ID }}
+          private-key: ${{ secrets.MINDHIVE_CICD_GH_PRIVATE_KEY }}
+          owner: mindhivenz
+          permission-contents: read
+      - run: docker run --rm -v "$PWD:/repo" -e GIT_CONFIG_COUNT -e GIT_CONFIG_KEY_0 -e GIT_CONFIG_VALUE_0 "$VOXBOX_IMAGE" ${{ matrix.task }}
+        env:
+          GIT_CONFIG_COUNT: 1
+          GIT_CONFIG_KEY_0: url.https://x-access-token:${{ steps.modules-token.outputs.token }}@github.com/mindhivenz/.insteadOf
+          GIT_CONFIG_VALUE_0: https://github.com/mindhivenz/
