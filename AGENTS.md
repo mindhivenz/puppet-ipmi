@@ -17,11 +17,17 @@ jig validate     # syntax, puppet-lint and rubocop
 jig test unit    # rspec-puppet unit tests
 ```
 
-To run a single spec file, call the container directly. Its entrypoint is `rake`, so any rake task works, such as `lint_fix`, `rubocop:autocorrect` or `spec`:
+To run a single spec file, or specs with private fixtures, call the container directly. Its entrypoint is `rake`, so any rake task works, such as `lint_fix`, `rubocop:autocorrect` or `spec`. Drop `SPEC` to run every spec:
 
 ```sh
-docker run --rm -v "$PWD:/repo" -e SPEC=spec/classes/<name>_spec.rb "$JIG_RUNNER_IMAGE" spec
+docker run --rm -v "$PWD:/repo" \
+  -e GIT_CONFIG_COUNT=1 \
+  -e GIT_CONFIG_KEY_0="url.https://x-access-token:$(gh auth token)@github.com/mindhivenz/.insteadOf" \
+  -e GIT_CONFIG_VALUE_0=https://github.com/mindhivenz/ \
+  -e SPEC=spec/classes/<name>_spec.rb "$JIG_RUNNER_IMAGE" spec
 ```
+
+The `GIT_CONFIG_*` variables let the container clone private `mindhivenz` fixtures with your `gh` token, as CI does with its App token (see Fixtures). They are harmless when every fixture is public.
 
 ## VoxBox gotchas
 
@@ -42,6 +48,8 @@ docker run --rm -v "$PWD:/repo" -e SPEC=spec/classes/<name>_spec.rb "$JIG_RUNNER
 ## Fixtures
 
 Use https URLs for git fixtures in `.fixtures.yml`. CI has no SSH key. It clones private `mindhivenz` repos with a `cicd-mindhivenz` GitHub App token, so give the App access to a private repo before using it as a fixture. The App credentials are shared only with private repos, so a public module can't have private fixtures.
+
+Locally, pass a `gh auth token` the same way (see Checking changes).
 
 ## Adding components
 
