@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    # A release tag points at a commit already checked when its branch was pushed
+    branches: ['**']
 
 permissions:
   contents: read
