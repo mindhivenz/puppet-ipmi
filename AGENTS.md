@@ -29,6 +29,15 @@ docker run --rm -v "$PWD:/repo" \
 
 The `GIT_CONFIG_*` variables let the container clone private `mindhivenz` fixtures with your `gh` token, as CI does with its App token (see Fixtures). They are harmless when every fixture is public.
 
+Spec both sides of every downtime gate. With puppet-datadog as a fixture, turn off the Datadog lookup in `pre_condition`, then set the fact `downtime: 'true'` (or the component's key) in the in-downtime context:
+
+```puppet
+class { 'datadog::downtime':
+  mode                => never,
+  unattended_upgrades => false,
+}
+```
+
 ## VoxBox gotchas
 
 * VoxBox uses its own `/opt/voxbox/Gemfile` and `/opt/voxbox/Rakefile`, so modules have neither, and msync deletes any that `jig convert` writes.
@@ -50,6 +59,10 @@ The `GIT_CONFIG_*` variables let the container clone private `mindhivenz` fixtur
 Use https URLs for git fixtures in `.fixtures.yml`. CI has no SSH key. It clones private `mindhivenz` repos with a `cicd-mindhivenz` GitHub App token, so give the App access to a private repo before using it as a fixture. The App credentials are shared only with private repos, so a public module can't have private fixtures.
 
 Locally, pass a `gh auth token` the same way (see Checking changes).
+
+## Downtime
+
+Each site has a daily downtime, usually 2 hours in the early morning local time. Changes that could disrupt a host in service, such as upgrades, restarts and reboots, are applied only during it. Before adding or changing anything that could disrupt a host, read [docs/agents/downtime.md](docs/agents/downtime.md).
 
 ## Adding components
 
