@@ -4,6 +4,8 @@ This file is shared by every `puppet-*` module and synced from [mindhivenz/msync
 
 The module is managed with [jig](https://github.com/voxpupuli/jig) (`jig.toml` beside `metadata.json`). Checks run inside the [VoxBox](https://github.com/voxpupuli/container-voxbox) container, so the host needs only jig and Docker. Host Ruby is not used. jig is also in the image: run it with `--entrypoint jig`.
 
+**Creating a module, or changing its GitHub access:** follow the Confluence page [Puppet module dev](https://mindhive-global.atlassian.net/wiki/x/sgAdLQ) first, including its once-only Publishing steps. A missed step surfaces only on the Puppet server, where every control-repo environment using the module fails to compile.
+
 ## Checking changes
 
 After any change, validate, lint, rubocop and spec must all pass. A failure is blocking. CI runs the same four on every push and pull request.
@@ -75,7 +77,3 @@ Each site has a daily downtime, usually 2 hours in the early morning local time.
   * `deny` mode packages only the allowlisted directories (`manifests/`, `files/`, ...) plus exceptions. It can't exclude a path inside an allowlisted directory, such as a local `files/**/.venv`.
   * In that case use `allow` mode, with exceptions listing the dev files.
 * Check the package with `tar -tzf pkg/<file>.tar.gz`.
-
-## More
-
-When creating a new module, or changing its GitHub access, read the Confluence page [Puppet module dev](https://mindhive-global.atlassian.net/wiki/x/sgAdLQ).
