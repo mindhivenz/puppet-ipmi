@@ -6,6 +6,17 @@ The module is managed with [jig](https://github.com/voxpupuli/jig) (`jig.toml` b
 
 **Creating a module, or changing its GitHub access:** follow the Confluence page [Puppet module dev](https://mindhive-global.atlassian.net/wiki/x/sgAdLQ) first, including its once-only Publishing steps. A missed step surfaces only on the Puppet server, where every control-repo environment using the module fails to compile.
 
+## Setup
+
+At the start of every session, check that this clone is set up. If `git config core.hooksPath` doesn't print `.githooks`, set it up:
+
+```sh
+git config core.hooksPath .githooks
+scripts/voxbox.sh fixtures:prep
+```
+
+The first line turns on the git hooks, which msync can't do because it can't set git config. The second installs the fixtures into `spec/fixtures/modules/`, because the hooks only reinstall them when `.fixtures.yml` changes. Every clone needs this once, so tell the person you're working with when you set one up.
+
 ## Checking changes
 
 After any change, validate, lint, rubocop and spec must all pass. A failure is blocking. CI runs the same four on every push and pull request.
@@ -60,11 +71,7 @@ Use https URLs for git fixtures in `.fixtures.yml`. CI has no SSH key. It clones
 
 ## Git hooks
 
-The hooks in `.githooks/` reinstall `spec/fixtures/modules/` when a branch switch, pull or rebase changes `.fixtures.yml`. If Docker isn't running, they warn and leave the fixtures stale. Each clone needs a one-off setup before git runs them. If `git config core.hooksPath` doesn't print `.githooks`, run:
-
-```sh
-git config core.hooksPath .githooks
-```
+The hooks in `.githooks/` reinstall `spec/fixtures/modules/` when a branch switch, pull or rebase changes `.fixtures.yml`. If Docker isn't running, they warn and leave the fixtures stale. Setup turns them on.
 
 ## Downtime
 
