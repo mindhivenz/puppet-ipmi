@@ -1,12 +1,32 @@
+# IDEA
+/.idea/workspace.xml
+/.idea/aws.xml
+/.idea/shelf/
+/.idea/awsToolkit.xml
+/.idea/httpRequests/
+
+# Ruby
 /.bundle/
+/.yardoc/
 /bin/
 /coverage/
 /Gemfile.local
 /Gemfile.lock
+/vendor/
+
+# Packages, built by jig
 /pkg/
+
+# Fixtures, installed by fixtures:prep
 /spec/fixtures/manifests/
 /spec/fixtures/modules/
-/vendor/
+
+# Python
+.ruff_cache/
+.venv/
+
+# Vim
 .*.sw[op]
+
+# macOS
 .DS_Store
-/.yardoc/
