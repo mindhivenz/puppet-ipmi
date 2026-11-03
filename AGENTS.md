@@ -16,20 +16,16 @@ The pinned image ref is `VOXBOX_IMAGE` in `.github/workflows/ci.yml`, the single
 export JIG_RUNNER_TYPE=voxbox
 export JIG_RUNNER_IMAGE=$(sed -n 's/^  VOXBOX_IMAGE: //p' .github/workflows/ci.yml)
 jig validate     # syntax, puppet-lint and rubocop
-jig test unit    # rspec-puppet unit tests
 ```
 
-To run a single spec file, or specs with private fixtures, call the container directly. Its entrypoint is `rake`, so any rake task works, such as `lint_fix`, `rubocop:autocorrect` or `spec`. Drop `SPEC` to run every spec:
+Run the rspec-puppet unit tests with `scripts/voxbox.sh`, which runs the container with the pinned image. Its entrypoint is `rake`, so any rake task works, such as `lint_fix` or `rubocop:autocorrect`. Drop `SPEC` to run every spec:
 
 ```sh
-docker run --rm -v "$PWD:/repo" \
-  -e GIT_CONFIG_COUNT=1 \
-  -e GIT_CONFIG_KEY_0="url.https://x-access-token:$(gh auth token)@github.com/mindhivenz/.insteadOf" \
-  -e GIT_CONFIG_VALUE_0=https://github.com/mindhivenz/ \
-  -e SPEC=spec/classes/<name>_spec.rb "$JIG_RUNNER_IMAGE" spec
+SPEC=spec/classes/<name>_spec.rb scripts/voxbox.sh fixtures:prep spec:standalone
 ```
 
-The `GIT_CONFIG_*` variables let the container clone private `mindhivenz` fixtures with your `gh` token, as CI does with its App token (see Fixtures). They are harmless when every fixture is public.
+* Use `fixtures:prep spec:standalone` rather than `spec`, which deletes the fixtures after a passing run (see Fixtures). CI runs `spec`.
+* The script lets the container clone private `mindhivenz` fixtures with your `gh` token, as CI does with its App token.
 
 Spec both sides of every downtime gate. With puppet-datadog as a fixture, turn off the Datadog lookup in `pre_condition`, then set the fact `downtime: 'true'` (or the component's key) in the in-downtime context:
 
@@ -60,7 +56,15 @@ class { 'datadog::downtime':
 
 Use https URLs for git fixtures in `.fixtures.yml`. CI has no SSH key. It clones private `mindhivenz` repos with a `cicd-mindhivenz` GitHub App token, so give the App access to a private repo before using it as a fixture. The App credentials are shared only with private repos, so a public module can't have private fixtures.
 
-Locally, pass a `gh auth token` the same way (see Checking changes).
+`fixtures:prep` installs the fixtures into `spec/fixtures/modules/`, which is gitignored, so an IDE can navigate into them. Never edit a fixture there. The git hooks keep it current, but after editing `.fixtures.yml` by hand, reinstall them with `scripts/voxbox.sh fixtures:prep`.
+
+## Git hooks
+
+The hooks in `.githooks/` reinstall `spec/fixtures/modules/` when a branch switch, pull or rebase changes `.fixtures.yml`. If Docker isn't running, they warn and leave the fixtures stale. Each clone needs a one-off setup before git runs them. If `git config core.hooksPath` doesn't print `.githooks`, run:
+
+```sh
+git config core.hooksPath .githooks
+```
 
 ## Downtime
 

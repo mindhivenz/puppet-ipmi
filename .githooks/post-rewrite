@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly trigger=.fixtures.yml
+readonly installed_to=spec/fixtures/modules/
+
+trigger_changed_since() {
+  # A new worktree is checked out from the null commit
+  [[ $1 =~ ^0+$ ]] || ! git diff --quiet "$1" HEAD -- "$trigger"
+}
+
+rebasing() {
+  [[ -d $(git rev-parse --git-path rebase-merge) || -d $(git rev-parse --git-path rebase-apply) ]]
+}
+
+case $(basename "$0") in
+  post-checkout)
+    # A file checkout (flag 0) leaves HEAD alone
+    [[ $3 == 1 ]] || exit 0
+    # A rebase checks out before it replays, and post-rewrite refreshes once it's done
+    rebasing && exit 0
+    readonly before=$1
+    ;;
+  post-merge)
+    readonly before=ORIG_HEAD
+    ;;
+  post-rewrite)
+    # An amend rewrites a commit whose changes are already in the working tree
+    [[ $1 == rebase ]] || exit 0
+    readonly before=ORIG_HEAD
+    ;;
+esac
+
+trigger_changed_since "$before" || exit 0
+
+# A hook that fails would fail the git command that ran it
+if ! docker info >/dev/null 2>&1; then
+  echo "warning: $trigger changed, but Docker isn't running, so $installed_to is stale. Start Docker, then refresh it as AGENTS.md describes." >&2
+  exit 0
+fi
+
+echo "$trigger changed, so refreshing $installed_to" >&2
+if ! scripts/voxbox.sh fixtures:prep; then
+  echo "warning: refreshing $installed_to failed. Refresh it as AGENTS.md describes." >&2
+fi

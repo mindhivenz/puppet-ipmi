@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Test all" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="JIG_RUNNER_IMAGE=$(sed -n 's/^  VOXBOX_IMAGE: //p' .github/workflows/ci.yml) jig test unit" />
+    <option name="SCRIPT_TEXT" value="scripts/voxbox.sh fixtures:prep spec:standalone" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
@@ -11,9 +11,7 @@
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="EXECUTE_IN_TERMINAL" value="true" />
     <option name="EXECUTE_SCRIPT_FILE" value="false" />
-    <envs>
-      <env name="JIG_RUNNER_TYPE" value="voxbox" />
-    </envs>
+    <envs />
     <method v="2" />
   </configuration>
 </component>
