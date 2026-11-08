@@ -77,6 +77,10 @@ The hooks in `.githooks/` reinstall `spec/fixtures/modules/` when a branch switc
 
 Each site has a daily downtime, usually 2 hours in the early morning local time. Changes that could disrupt a host in service, such as upgrades, restarts and reboots, are applied only during it. Before adding or changing anything that could disrupt a host, read [docs/agents/downtime.md](docs/agents/downtime.md).
 
+## Datadog checks
+
+The Datadog agent runs its checks as root on every host. A custom check reads files, opens devices and runs commands directly, so it needs no sudoers entry or `datadog::agent_in_group` membership. Remove both from any check you touch. Only the trace agent still runs as `dd-agent`.
+
 ## Adding components
 
 `jig new class|defined_type|function|fact|task <name>` adds a component and its spec in the module layout.
