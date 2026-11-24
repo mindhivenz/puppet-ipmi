@@ -2,7 +2,7 @@
 
 This file is shared by every `puppet-*` module and synced from [mindhivenz/msync](https://github.com/mindhivenz/msync). Change it there, not here.
 
-The module is managed with [jig](https://github.com/voxpupuli/jig) (`jig.toml` beside `metadata.json`). Checks run inside the [VoxBox](https://github.com/voxpupuli/container-voxbox) container, so the host needs only jig and Docker. Host Ruby is not used. jig is also in the image: run it with `--entrypoint jig`.
+The module is managed with [jig](https://github.com/voxpupuli/jig) (`jig.toml` beside `metadata.json`). Checks and jig both run inside the [VoxBox](https://github.com/voxpupuli/container-voxbox) container through `scripts/voxbox.sh`, pinned to the image CI uses, so the host needs only Docker. Host Ruby and host jig are not used.
 
 **Creating a module, or changing its GitHub access:** follow the Confluence page [Puppet module dev](https://mindhive-global.atlassian.net/wiki/x/sgAdLQ) first, including its once-only Publishing steps. A missed step surfaces only on the Puppet server, where every control-repo environment using the module fails to compile.
 
@@ -21,17 +21,10 @@ The first line turns on the git hooks, which msync can't do because it can't set
 
 After any change, validate, lint, rubocop and spec must all pass. A failure is blocking. CI runs the same four on every push and pull request.
 
-The pinned image ref is `VOXBOX_IMAGE` in `.github/workflows/ci.yml`, the single source of truth. Run with the same ref:
+Run them with `scripts/voxbox.sh`, which runs the container with `VOXBOX_IMAGE` from `.github/workflows/ci.yml`, the single source of truth for the image. Its entrypoint is `rake`, as in CI, so any rake task works, such as `lint_fix` or `rubocop:autocorrect`. Drop `SPEC` to run every spec:
 
 ```sh
-export JIG_RUNNER_TYPE=voxbox
-export JIG_RUNNER_IMAGE=$(sed -n 's/^  VOXBOX_IMAGE: //p' .github/workflows/ci.yml)
-jig validate     # syntax, puppet-lint and rubocop
-```
-
-Run the rspec-puppet unit tests with `scripts/voxbox.sh`, which runs the container with the pinned image. Its entrypoint is `rake`, so any rake task works, such as `lint_fix` or `rubocop:autocorrect`. Drop `SPEC` to run every spec:
-
-```sh
+scripts/voxbox.sh validate lint rubocop
 SPEC=spec/classes/<name>_spec.rb scripts/voxbox.sh fixtures:prep spec:standalone
 ```
 
@@ -79,11 +72,11 @@ Each site has a daily downtime, usually 2 hours in the early morning local time.
 
 ## Adding components
 
-`jig new class|defined_type|function|fact|task <name>` adds a component and its spec in the module layout.
+`scripts/voxbox.sh jig new class|defined_type|function|fact|task <name>` adds a component and its spec in the module layout.
 
 ## Building
 
-* `jig build` writes the package to `pkg/`. It needs `summary` and `source` in `metadata.json`.
+* `scripts/voxbox.sh jig build` writes the package to `pkg/`. It needs `summary` and `source` in `metadata.json`.
 * The `[build]` section of `jig.toml` controls what is packaged. It ignores `.gitignore`.
   * `deny` mode packages only the allowlisted directories (`manifests/`, `files/`, ...) plus exceptions. It can't exclude a path inside an allowlisted directory, such as a local `files/**/.venv`.
   * In that case use `allow` mode, with exceptions listing the dev files.
